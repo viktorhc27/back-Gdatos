@@ -1,12 +1,22 @@
 const { Op } = require('sequelize');
 const { Producto, Categoria, Ventas, DetalleVenta } = require('../models/associations');
-const ExcelJS = require('exceljs')
+const ExcelJS = require('exceljs');
+const { kuv_lazy_table } = require('../helpers/kuv-lazy-table');
 var controlador = {};
 
 controlador.index = async (req, res) => {
     try {
+        let opts = kuv_lazy_table(req.body)
 
-        const result = await Producto.findAll({ include: [{ model: Categoria, as: "categoria" }] });
+        opts.include = [{ model: Categoria, as: 'categoria' }]
+
+        const result = await Producto.findAndCountAll(opts);
+
+        return res.json({
+            elements: result.rows,
+            count: result.count
+        });
+        //  const result = await Producto.findAll({ include: [{ model: Categoria, as: "categoria" }] });
 
         // const result = await Ventas.findAll({ include: { model: DetalleVenta, include: [{ model: Producto}]} });
 
@@ -21,8 +31,6 @@ controlador.index = async (req, res) => {
         });
     }
 }
-
-
 controlador.total = async (req, res) => {
     try {
 
@@ -37,7 +45,6 @@ controlador.total = async (req, res) => {
         });
     }
 }
-
 controlador.excel = async (req, res) => {
     try {
         const productos = await Producto.findAll({ include: [{ model: Categoria, as: 'categoria' }] })
@@ -80,4 +87,79 @@ controlador.excel = async (req, res) => {
         });
     }
 }
+controlador.save = async (req, res) => {
+    try {
+        let producto = req.body.producto;
+        console.log(producto.img);
+        let model = await Producto.create(producto);
+        return res.json({ response: "Agregado Correctamente", id: model.id });
+
+
+    } catch (error) {
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
+controlador.upload = async (req, res) => {
+    try {
+        let file = req.files.image;
+        console.log(file.image);
+        // Convierte idUser a número si es necesario
+        let userId = parseInt(req.body.idUser, 10);
+
+        let type = "." + file.mimetype.split('/')[1];
+        let nombre = `${userId}_${Date.now()}${type}`;
+
+        if (!req.files || Object.keys(req.files).length === 0) {
+            return res.status(400).json({ response: 'No files were uploaded.' });
+        }
+        await Producto.update({ img: nombre }, { where: { id: req.body.idUser } })
+        file.mv(`./uploads/${nombre}`, err => {
+            if (err) return res.status(500).send({ message: err });
+
+            return res.status(200).send({ message: 'File uploaded successfully', nombre });
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+};
+
+controlador.view = async (req, res) => {
+    try {
+        let id = req.params.id
+
+        let producto = await Producto.findByPk(id)
+        return res.json(producto)
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
+controlador.update = async (req, res) => {
+    try {
+        let post = req.body.producto
+
+        let producto = await Producto.update(post, { where: { id: post.id } })
+        return res.json({reposnse:"Actualizado con éxito"})
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
+
+
 module.exports = controlador;
