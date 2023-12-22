@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router()
-const { index, total, excel, save, upload, view,update } = require('../controller/producto.controller');
+const { index, total, excel, save, upload, view, update, reporte_meses } = require('../controller/producto.controller');
 
 
 
@@ -12,6 +12,7 @@ router.get('/view/:id', view)
 router.post('/save', save)
 router.post('/update', update)
 router.post('/upload', upload)
+router.post('/reporte_meses', reporte_meses)
 
 
 

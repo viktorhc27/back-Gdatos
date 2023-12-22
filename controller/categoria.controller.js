@@ -1,14 +1,14 @@
 const { Op } = require('sequelize');
-const {Categoria } = require('../models/associations');
+const { Categoria } = require('../models/associations');
 
 var controlador = {};
 
 controlador.index = async (req, res) => {
     try {
 
-         const result = await Categoria.findAll(); 
+        const result = await Categoria.findAll();
 
-       // const result = await Ventas.findAll({ include: { model: DetalleVenta, include: [{ model: Producto}]} });
+        // const result = await Ventas.findAll({ include: { model: DetalleVenta, include: [{ model: Producto}]} });
 
 
         return res.json(result);
@@ -35,6 +35,37 @@ controlador.list = async (req, res) => {
         });
     }
 }
+controlador.save = async (req, res) => {
+    try {
 
+        let categorias = req.body.categoria
+
+        await Categoria.create({ nombre: categorias.nombre })
+
+        res.json({ response: "Creado éxitosamente" })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
+controlador.update = async (req, res) => {
+    try {
+
+        let categorias = req.body.categoria
+
+        await Categoria.update(categorias, { where: { id: categorias.id } })
+
+        res.json({ response: "modificado éxitosamente" })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
 
 module.exports = controlador;

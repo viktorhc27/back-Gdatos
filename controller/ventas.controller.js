@@ -1,6 +1,7 @@
 const { Op, Sequelize } = require('sequelize');
 const { Ventas, Producto, Categoria, DetalleVenta } = require('../models/associations');
-
+const db = require('../config/db');
+const moment = require('moment'); // require
 var controlador = {};
 
 controlador.index = async (req, res) => {
@@ -127,7 +128,63 @@ controlador.productoMasVendido = async (req, res) => {
         });
     }
 }
+controlador.reporte_meses = async (req, res) => {
+    try {
+        let fechaInicio = moment(req.body.fecha_inicio);
+        let fechaFinal = moment(req.body.fecha_final);
+        let fechaFormateadaInicio = fechaInicio.format('YYYY-MM-DD') + ' 00:00:00';
+        let fechaFormateadaFinal = fechaFinal.format('YYYY-MM-DD') + ' 23:59:59';
+        let meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        let reporteMeses = [];
+        let mesesDiferencia = fechaFinal.diff(fechaInicio, 'month');
+        let aux = fechaInicio.month();
+        let fecha = fechaInicio.clone();
 
+        for (let i = 0; i <= mesesDiferencia; i++) {
+            reporteMeses.push({
+                mes: meses[aux],
+                anho: fecha.format('YYYY'),
+                total: 0
+            });
+            aux = (aux === 11) ? 0 : aux + 1;
+            fecha.add(1, 'month');
+        }
+
+
+        let reporte = await Ventas.findAll({
+            attributes: [
+                [db.fn('YEAR', db.col('fecha')), 'anho'],
+                [db.fn('MONTH', db.col('fecha')), 'mes'],
+                [db.fn('SUM', db.col('total')), 'total']
+            ],
+            where: {
+                fecha: {
+                    [Op.between]: [fechaFormateadaInicio, fechaFormateadaFinal]
+                }
+            },
+            group: [
+                db.fn('YEAR', db.col('fecha')),
+                db.fn('MONTH', db.col('fecha'))
+            ]
+        });
+
+
+        for (let i = 0; i < reporte.length; i++) {
+
+            let aux = reporte[i].dataValues.mes - 1
+            reporteMeses[aux].total = parseInt(reporte[i].dataValues.total)
+
+        }
+
+        return res.json(reporteMeses);
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+};
 controlador.total = async (req, res) => {
     try {
 
