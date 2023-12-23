@@ -8,41 +8,18 @@ const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
 const fs = require('fs')
+const fileHandler = require('./middlewares/fileHandler');
+const corsConfig = require('./config/cors.js');
 
 
 //crear la app
 const app = express();
 app.use(fileUpload())
-
-
-
-
 // Configurar encabezados CORS
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-    next();
-});
+app.use(corsConfig);
 // Middleware para parsear el cuerpo de la solicitud como JSON
 app.use(bodyParser.json());
 
-const generateFilename = (req, file, cb) => {
-    const userId = req.body.userId || 'default'; // Puedes obtener el ID del cuerpo de la solicitud o de donde sea necesario
-console.log(userId);
-    
-    const filename = `${userId}_${Date.now()}${path.extname(file.originalname)}`;
-    cb(null, filename);
-  };
-  
-// Configuración de multer
-const storage = multer.diskStorage({
-
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: generateFilename,
-});
-const upload = multer({ storage: storage });
 const conectarDB = async () => {
     try {
         await db.authenticate()
@@ -61,39 +38,10 @@ app.use(express.urlencoded({ extended: true }))
 
 
 //routing
-// Ruta para manejar la subida de archivos
-app.post('/upload', upload.single('file'), (req, res) => {
-   
-    res.json({ message: 'Archivo subido con éxito', img: upload });
-});
-
 app.use('/api/productos', productoRoutes)
 app.use('/api/categorias', categoriasRoutes)
 app.use('/api/ventas', ventasRoutes)
-app.get('/:img', (req, res) => {
-    try {
-        let name = req.params.img
-        /* console.log(__dirname + '/src/assets/files/'+name) */
-
-        if (fs.existsSync(__dirname + '/uploads/' + name)) {
-            //file exists
-            res.sendFile(__dirname + `/uploads/${name}`);
-        }
-        else {
-            res.sendFile(__dirname + `/uploads/sin_imagen.png`);
-        }
-    } catch (err) {
-        console.error(err)
-    }
-
-});
-app.use((err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-        res.status(400).json({ error: err.message });
-    } else {
-        res.status(500).json({ error: 'Error interno del servidor' });
-    }
-});
+app.get('/:img', fileHandler);
 
 //definir puerto y arrancar proyecto
 const port = process.env.PORT || 3000;

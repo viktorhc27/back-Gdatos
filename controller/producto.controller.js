@@ -92,8 +92,8 @@ controlador.excel = async (req, res) => {
 controlador.save = async (req, res) => {
     try {
         let producto = req.body.producto;
-        console.log(producto.img);
-        let model = await Producto.create({ producto });
+        console.log(producto);
+        let model = await Producto.create(producto);
         return res.json({ response: "Agregado Correctamente", id: model.id });
 
 
