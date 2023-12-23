@@ -1,7 +1,9 @@
 // config/cors.js
 const cors = require('cors');
 
-const allowedOrigins = ['http://localhost:4200']; // Agrega aquí los orígenes permitidos
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:4200'];
 
 const corsConfig = cors({
   origin: function (origin, callback) {
