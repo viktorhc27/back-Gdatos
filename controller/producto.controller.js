@@ -92,7 +92,9 @@ controlador.excel = async (req, res) => {
 controlador.save = async (req, res) => {
     try {
         let producto = req.body.producto;
-        console.log(producto);
+        if (!producto.img) {
+            producto.img = "sinimagen.jpg"
+        }
         let model = await Producto.create(producto);
         return res.json({ response: "Agregado Correctamente", id: model.id });
 
@@ -161,6 +163,25 @@ controlador.update = async (req, res) => {
         });
     }
 }
+controlador.eliminar = async (req, res) => {
+    try {
+
+        const id = req.params.id;
+
+        const result = await Producto.destroy({ where: { id: id } });
+
+        return res.status(200).json(result);
+
+    }
+
+    catch (error) {
+        return res.status(500).json({
+            msg: 'Hable con el administrador',
+            error
+        })
+    }
+}
+
 controlador.reporte_meses = async (req, res) => {
     try {
         let fechaInicio = moment(req.body.fecha_inicio);
@@ -209,7 +230,7 @@ controlador.reporte_meses = async (req, res) => {
 
         }
 
-        return res.json({ fechaFormateadaInicio, fechaFormateadaFinal, mesesDiferencia, reporteMeses});
+        return res.json({ fechaFormateadaInicio, fechaFormateadaFinal, mesesDiferencia, reporteMeses });
     } catch (error) {
         console.error(error);
         return res.status(500).json({

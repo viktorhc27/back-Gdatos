@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router()
-const { index, total, excel, save, upload, view, update, reporte_meses } = require('../controller/producto.controller');
+const { index, total, excel, save, upload, view, update, reporte_meses, eliminar} = require('../controller/producto.controller');
 
 
 
 //Routing
 router.post('/index', index)
+router.delete('/delete/:id', eliminar)
 router.get('/total', total)
 router.get('/excel', excel)
 router.get('/view/:id', view)

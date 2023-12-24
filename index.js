@@ -41,7 +41,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/productos', productoRoutes)
 app.use('/api/categorias', categoriasRoutes)
 app.use('/api/ventas', ventasRoutes)
-app.get('/:img', fileHandler);
+app.get('/api/:img', fileHandler);
 
 //definir puerto y arrancar proyecto
 const port = process.env.PORT || 3000;
