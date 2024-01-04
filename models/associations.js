@@ -4,6 +4,7 @@ const Ventas = require('./ventas')
 const DetalleVenta = require('./detalle_venta')
 const MetodoPagos = require('./metodo_pagos')
 const TipoDocumento = require('./tipo_documento')
+const Usuarios = require('./usuarios')
 
 Categoria.hasMany(Producto, { foreignKey: 'categoria_id' })
 Producto.belongsTo(Categoria, { foreignKey: 'categoria_id', as: 'categoria' })
@@ -27,5 +28,6 @@ module.exports = {
     Ventas,
    DetalleVenta,
     MetodoPagos,
-    TipoDocumento
+    TipoDocumento,
+    Usuarios
 }

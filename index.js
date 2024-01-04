@@ -4,6 +4,7 @@ const db = require('./config/db.js')
 const productoRoutes = require('./routes/producto.routes.js')
 const ventasRoutes = require('./routes/ventas.routes.js')
 const categoriasRoutes = require('./routes/categorias.routes')
+const usuariosRoutes = require('./routes/usuario.routes')
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
@@ -42,6 +43,7 @@ app.use('/api/productos', productoRoutes)
 app.use('/api/categorias', categoriasRoutes)
 app.use('/api/ventas', ventasRoutes)
 app.get('/api/:img', fileHandler);
+app.use('/api/usuarios', usuariosRoutes)
 
 //definir puerto y arrancar proyecto
 const port = process.env.PORT || 3000;

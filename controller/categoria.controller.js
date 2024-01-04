@@ -1,22 +1,23 @@
 const { Op } = require('sequelize');
 const { Categoria } = require('../models/associations');
-
+const { kuv_lazy_table } = require('../helpers/kuv-lazy-table');
 var controlador = {};
 
 controlador.index = async (req, res) => {
     try {
+        let opts = kuv_lazy_table(req.body)
 
-        const result = await Categoria.findAll();
+        const result = await Categoria.findAndCountAll(opts);
 
-        // const result = await Ventas.findAll({ include: { model: DetalleVenta, include: [{ model: Producto}]} });
+        return res.json({
+            elements: result.rows,
+            count: result.count
+        });
 
-
-        return res.json(result);
-
-    } catch (Error) {
-        console.error(Error);
+    } catch (error) {
+        console.error(error);
         return res.status(500).json({
-            err: Error,
+            err: error,
             response: "Fallo del servidor"
         });
     }
@@ -68,4 +69,18 @@ controlador.update = async (req, res) => {
     }
 }
 
+controlador.view = async (req, res) => {
+    try {
+
+        let id = req.params.id
+        let model = await Categoria.findByPk(id)
+        return res.status(200).json(model)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
 module.exports = controlador;
