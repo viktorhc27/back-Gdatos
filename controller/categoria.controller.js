@@ -83,4 +83,16 @@ controlador.view = async (req, res) => {
         });
     }
 }
+controlador.count = async (req, res) => {
+    try {
+        let model = await Categoria.count()
+        return res.status(200).json(model)
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            err: error,
+            response: "Fallo del servidor"
+        });
+    }
+}
 module.exports = controlador;
